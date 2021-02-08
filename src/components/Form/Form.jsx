@@ -1,61 +1,54 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { useSelector, useDispatch } from 'react-redux';
-import { getContacts } from '../../redux/selectors';
-import { addContact } from '../../redux/operations';
+import { getContacts } from 'redux/phonebook/phonebook-selectors';
+import * as phonebookOperations from 'redux/phonebook/phonebook-operations';
 import s from './Form.module.css';
 
-export default function Nameform() {
+export default function MyForm() {
   const contacts = useSelector(getContacts);
   const dispatch = useDispatch();
-  const onSubmit = (name, number) => dispatch(addContact(name, number));
+  const onSubmit = (name, number) =>
+    dispatch(phonebookOperations.addContact(name, number));
 
   const [name, setName] = useState('');
   const [number, setNumber] = useState('');
 
-  function handleChange(event) {
-    const { name, value } = event.target;
-    switch (name) {
-      case 'name':
-        setName(value);
-        console.log(value);
-        break;
-      case 'number':
-        setNumber(value);
-        console.log(value);
-        break;
-      default:
-        return;
-    }
-  }
-
-  const checkName = name => {
-    return contacts.find(
-      contact => contact.name.toLowerCase() === name.toLowerCase(),
+  const contactMatching = () => {
+    const namesInPhonebook = contacts.reduce(
+      (acc, contact) => [...acc, contact.name],
+      [],
     );
-  };
 
-  const checkNumber = number => {
-    return contacts.find(contact => contact.number === number);
-  };
+    const numbersInPhonebook = contacts.reduce(
+      (acc, contact) => [...acc, contact.number],
+      [],
+    );
 
-  function handleSubmit(e) {
-    e.preventDefault();
-
-    if (checkName(name)) {
-      alert(`${name} is already added.`);
-    } else if (checkNumber(number)) {
-      alert(`${number} is already added.`);
-    } else if (name.trim() === '' || number.trim() === '') {
-      alert('All of inputs must be not empty');
-    } else {
-      //  dispatch(addContact(name, number));
-      onSubmit(name, number);
+    if (
+      namesInPhonebook.includes(name) ||
+      numbersInPhonebook.includes(number)
+    ) {
+      alert(`${name}${number} is already in contacts`);
+      return true;
     }
 
-    // onSubmit(name, number);
+    if (name === '' || number === '') {
+      alert('Please enter all data');
+      return true;
+    }
+  };
+
+  const handleSubmit = e => {
+    e.preventDefault();
     setName('');
     setNumber('');
-  }
+
+    if (contactMatching()) {
+      return;
+    }
+
+    onSubmit(name, number);
+  };
 
   return (
     <form onSubmit={handleSubmit} className={s.form}>
@@ -66,10 +59,11 @@ export default function Nameform() {
           name="name"
           value={name}
           placeholder=""
-          onChange={handleChange}
+          onChange={e => setName(e.currentTarget.value)}
           className={s.input}
         />
       </label>
+
       <label className={s.label}>
         Number
         <input
@@ -77,18 +71,14 @@ export default function Nameform() {
           name="number"
           value={number}
           placeholder=""
-          onChange={handleChange}
+          onChange={e => setNumber(e.currentTarget.value)}
           className={s.input}
         />
       </label>
 
-      {
-        <button type="submit" className={s.button}>
-          Add contact
-        </button>
-      }
+      <button type="submit" className={s.button}>
+        Add contact
+      </button>
     </form>
   );
 }
-
-// export default Form;

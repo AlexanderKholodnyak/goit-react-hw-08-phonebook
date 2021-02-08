@@ -1,17 +1,13 @@
 import { useSelector, useDispatch } from 'react-redux';
-import { useEffect } from 'react';
-import * as operations from '../../redux/operations';
-import { getVisibleContacts } from '../../redux/selectors';
+// import { MdPhoneForwarded } from 'react-icons/md';
+import * as phonebookOperations from 'redux/phonebook/phonebook-operations';
+import { getVisibleContacts } from 'redux/phonebook/phonebook-selectors';
 import s from './Contacts.module.css';
 
 function Contacts() {
   const contacts = useSelector(getVisibleContacts);
   const dispatch = useDispatch();
-  const onDeleteContact = id => dispatch(operations.deleteContact(id));
-
-  useEffect(() => {
-    dispatch(operations.fetchContacts());
-  }, [dispatch]);
+  const onDeleteContact = id => dispatch(phonebookOperations.deleteContact(id));
 
   return (
     <ul>
